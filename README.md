@@ -1,6 +1,6 @@
 # Mini Lab Controller (`minilab`)
 
-[![ci](https://github.com/divyanshu/minilab-controller/actions/workflows/ci.yml/badge.svg)](https://github.com/divyanshu/minilab-controller/actions/workflows/ci.yml)
+[![ci](https://github.com/des2yapath/minilab-controller/actions/workflows/ci.yml/badge.svg)](https://github.com/des2yapath/minilab-controller/actions/workflows/ci.yml)
 
 **`minilab`** is an asynchronous Python controller that orchestrates a **simulated hardware** robotic laboratory workcell comprising two multi-axis positioning arms, a fluidic dispensing pump, and an active reaction heater. Built using Python's `asyncio` event loop, `minilab` implements a CRC32-framed wire protocol featuring acknowledgements (ACK), timeouts, retries, idempotent reply caching, spatial zone mutual exclusion, and concurrent emergency stop (e-stop) propagation under synthetic transport fault injection.
 
@@ -38,7 +38,7 @@ home       arm1       |                                          █████
 
 ### Installation
 ```bash
-git clone https://github.com/divyanshu/minilab-controller.git
+git clone https://github.com/des2yapath/minilab-controller.git
 cd minilab-controller
 python -m venv .venv
 # On Linux/macOS:
@@ -50,7 +50,7 @@ pip install -e ".[dev]"
 
 ### Running Commands
 ```bash
-# Run test suite (59 tests)
+# Run test suite (61 tests)
 pytest -q
 
 # Run live ASCII Gantt demo
@@ -127,7 +127,7 @@ The host controller comprises an `Orchestrator` managing life-cycle and safety l
 
 ![Latency Histogram](docs/img/latency.png)
 
-- **Test Suite:** **59** automated integration and regression tests running in **< 17 s**.
+- **Test Suite:** **61** automated integration and regression tests running in **< 19 s**.
 - **Fuzz Testing:** **10** distinct pseudo-random seeds verified under heavy transport faults (15% drop, 10% dup, 5% corruption, 30% delay) with zero task or lock leaks.
 
 ---
