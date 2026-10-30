@@ -13,6 +13,8 @@ from typing import Any, Self
 from minilab.devices import Device, make_device
 from minilab.host.client import DeviceClient, EStopState
 from minilab.host.orchestrator import Orchestrator
+from minilab.host.workflow import Workflow, WorkflowResult
+from minilab.host.zones import ZoneManager
 from minilab.logs import EventLog
 from minilab.metrics import Metrics
 from minilab.transport import FaultConfig, Link, LinkFaults
@@ -115,7 +117,12 @@ class System:
                 max_retries=config.max_retries,
             )
 
-        self.zones: Any = None
+        self.zones = ZoneManager(
+            names=config.zones,
+            ordered=config.zone_ordered,
+            step_delay=config.zone_step_delay,
+            log=self.log,
+        )
         self.orchestrator = Orchestrator(
             clients=self.clients,
             zones=self.zones,
@@ -124,6 +131,10 @@ class System:
             metrics=self.metrics,
             zone_timeout=config.zone_timeout,
         )
+
+    async def run(self, wf: Workflow) -> WorkflowResult:
+        """Execute a workflow DAG through the orchestrator."""
+        return await self.orchestrator.run(wf)
 
     async def __aenter__(self) -> Self:
         # Emit run_config as the first event in the log
