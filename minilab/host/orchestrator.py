@@ -41,6 +41,7 @@ class Orchestrator:
         self.zone_timeout = zone_timeout
         self._step_tasks: set[asyncio.Task[Any]] = set()
         self._last_report: dict[str, Any] = {}
+        self._estop_fut: asyncio.Future[dict[str, Any]] | None = None
 
     def register_step_tasks(self, tasks: list[asyncio.Task[Any]]) -> None:
         """Register active step tasks for cancellation tracking."""
@@ -65,50 +66,60 @@ class Orchestrator:
 
     async def estop(self, reason: str) -> dict[str, Any]:
         """Trigger emergency stop across all devices and cancel running steps."""
-        if self.estop_state.active:
-            return self._last_report
+        if self._estop_fut is not None:
+            return await self._estop_fut
 
+        loop = asyncio.get_running_loop()
+        self._estop_fut = loop.create_future()
         self.estop_state.active = True
         t0 = time.perf_counter()
         self.log.emit("orchestrator", "estop_start", reason=reason)
 
-        # 1. Send e-stop to all devices concurrently
-        stop_tasks = [asyncio.create_task(c.estop()) for c in self.clients.values()]
+        try:
+            # 1. Send e-stop to all devices concurrently
+            stop_tasks = [asyncio.create_task(c.estop()) for c in self.clients.values()]
 
-        # 2. Cancel running software step tasks (except current caller task)
-        me = asyncio.current_task()
-        victims = [t for t in self._step_tasks if t is not me and not t.done()]
-        for t in victims:
-            t.cancel()
+            # 2. Cancel running software step tasks (except current caller task)
+            me = asyncio.current_task()
+            victims = [t for t in self._step_tasks if t is not me and not t.done()]
+            for t in victims:
+                t.cancel()
 
-        # 3. Wait for hardware acks and software task termination
-        acks = await asyncio.gather(*stop_tasks, return_exceptions=True)
-        await asyncio.gather(*victims, return_exceptions=True)
+            # 3. Wait for hardware acks and software task termination
+            acks = await asyncio.gather(*stop_tasks, return_exceptions=True)
+            await asyncio.gather(*victims, return_exceptions=True)
 
-        acked: list[str] = []
-        unreachable: list[str] = []
-        for dev_name, ack_res in zip(self.clients.keys(), acks, strict=False):
-            if ack_res is True:
-                acked.append(dev_name)
-                self.log.emit("orchestrator", "estop_device_ack", device=dev_name)
-            else:
-                unreachable.append(dev_name)
-                self.log.emit("orchestrator", "estop_device_unreachable", device=dev_name)
+            acked: list[str] = []
+            unreachable: list[str] = []
+            for dev_name, ack_res in zip(self.clients.keys(), acks, strict=False):
+                if ack_res is True:
+                    acked.append(dev_name)
+                    self.log.emit("orchestrator", "estop_device_ack", device=dev_name)
+                else:
+                    unreachable.append(dev_name)
+                    self.log.emit("orchestrator", "estop_device_unreachable", device=dev_name)
 
-        duration = time.perf_counter() - t0
-        report = {
-            "reason": reason,
-            "duration": round(duration, 6),
-            "acked": acked,
-            "unreachable": unreachable,
-        }
-        self.log.emit("orchestrator", "estop_complete", **report)
-        self._last_report = report
-        return report
+            duration = time.perf_counter() - t0
+            report = {
+                "reason": reason,
+                "duration": round(duration, 6),
+                "acked": acked,
+                "unreachable": unreachable,
+            }
+            self.log.emit("orchestrator", "estop_complete", **report)
+            self._last_report = report
+            self._estop_fut.set_result(report)
+            return report
+        except BaseException as e:
+            if not self._estop_fut.done():
+                self._estop_fut.set_exception(e)
+            raise
 
     async def reset(self) -> dict[str, Any]:
         """Clear e-stop latch and attempt to re-initialize all devices."""
         self.estop_state.active = False
+        self._estop_fut = None
+        self._last_report = {}
         reset_list: list[str] = []
         still_offline: list[str] = []
 
