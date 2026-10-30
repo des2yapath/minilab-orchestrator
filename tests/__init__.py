@@ -1,0 +1,2 @@
+"""minilab test suite."""
+
