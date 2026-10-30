@@ -12,7 +12,7 @@ from typing import Any
 
 from minilab.errors import DeviceError
 from minilab.logs import EventLog
-from minilab.messages import Message
+from minilab.messages import Message, ack_for
 from minilab.transport import Endpoint
 
 
@@ -55,6 +55,26 @@ class Device:
         await self.on_start()
         self._log.emit(f"device:{self.name}", "device_start")
         self._main = asyncio.create_task(self._loop(), name=f"device:{self.name}")
+
+        def _on_main_done(t: asyncio.Task[None]) -> None:
+            if not t.cancelled() and t.exception() is not None:
+                self._log.emit(
+                    "system", "task_crashed", task=t.get_name(), error=str(t.exception())
+                )
+
+        self._main.add_done_callback(_on_main_done)
+
+    def _watch_task(self, t: asyncio.Task[None]) -> None:
+        self._tasks.add(t)
+
+        def _on_done(task: asyncio.Task[None]) -> None:
+            self._tasks.discard(task)
+            if not task.cancelled() and task.exception() is not None:
+                self._log.emit(
+                    "system", "task_crashed", task=task.get_name(), error=str(task.exception())
+                )
+
+        t.add_done_callback(_on_done)
 
     async def stop(self) -> None:
         """Stop reader loop and all executing tasks cleanly."""
@@ -119,17 +139,16 @@ class Device:
         )
 
         if self.dedup and is_dup:
-            await self.ep.send(Message("ack", msg.msg_id, self.name))
+            await self.ep.send(ack_for(msg))
             reply = self._replies[msg.msg_id]
             if reply is not None:
                 await self.ep.send(reply)
             return
 
         self._replies[msg.msg_id] = None
-        await self.ep.send(Message("ack", msg.msg_id, self.name))
+        await self.ep.send(ack_for(msg))
         t = asyncio.create_task(self._execute(msg))
-        self._tasks.add(t)
-        t.add_done_callback(self._tasks.discard)
+        self._watch_task(t)
 
     async def _execute(self, msg: Message) -> None:
         """Execute command in isolated task so reader loop stays responsive to e-stop."""

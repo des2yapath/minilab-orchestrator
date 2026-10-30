@@ -43,6 +43,11 @@ class Message:
     attempt: int = 0
 
 
+def ack_for(msg: Message) -> Message:
+    """Build an immediate acknowledgement frame matching an incoming message."""
+    return Message(type="ack", msg_id=msg.msg_id, device=msg.device, attempt=msg.attempt)
+
+
 def encode(msg: Message) -> str:
     """Encode a Message into a CRC-prefixed string frame.
 

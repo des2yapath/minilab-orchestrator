@@ -51,3 +51,57 @@ async def test_log_has_run_config_first_and_step_events() -> None:
 
         assert expected_steps.issubset(starts)
         assert expected_steps.issubset(dones)
+
+
+async def test_replay_and_perfetto_trace_export(tmp_path: pytest.TempPathFactory) -> None:
+    """Verify log replay and Perfetto trace export tool in automated testing."""
+    import argparse
+    import json
+
+    from minilab.cli import _run_scenario
+    from minilab.cli_tools import export_trace, run_replay
+
+    log_file = str(tmp_path / "fuzz_run.jsonl")
+    trace_file = str(tmp_path / "fuzz_trace.json")
+
+    # Run scenario to generate log
+    args_run = argparse.Namespace(
+        scenario="basic",
+        seed=42,
+        time_scale=0.05,
+        faults=None,
+        log=log_file,
+        timeout=10.0,
+        estop_after=None,
+        naive_zones=False,
+        zone_timeout=None,
+        no_dedup=False,
+    )
+    code_run = await _run_scenario(args_run)
+    assert code_run == 0
+
+    # Replay from log
+    code_replay = await run_replay(log_file)
+    assert code_replay == 0
+
+    # Export trace
+    code_trace = export_trace(log_file, trace_file)
+    assert code_trace == 0
+
+    trace_data = json.loads((tmp_path / "fuzz_trace.json").read_text(encoding="utf-8"))
+    assert "traceEvents" in trace_data
+    assert any(ev.get("ph") == "X" for ev in trace_data["traceEvents"])
+
+
+def test_system_config_roundtrip() -> None:
+    """Verify SystemConfig serialization roundtrip preserving nested structures."""
+    from minilab.system import SystemConfig
+    from minilab.transport import FaultConfig, LinkFaults
+
+    cfg = SystemConfig(
+        seed=7,
+        time_scale=0.25,
+        faults={"pump1": LinkFaults(to_device=FaultConfig(drop_first_n=2, drop_indices=(4, 5)))},
+    )
+    roundtripped = SystemConfig.from_dict(cfg.to_dict())
+    assert roundtripped == cfg

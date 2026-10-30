@@ -113,8 +113,30 @@ async def run_replay(logfile: str) -> int:
         or (sres.status == StepStatus.SKIPPED and orig_steps.get(sid) == "step_skipped")
     )
     print(f"Steps Status Matches: {match_count}/{len(result.steps)}")
+
+    # Compare per-channel fault decisions
+    def fault_decisions(evs: list[dict[str, Any]]) -> dict[str, list[tuple[int, str]]]:
+        out: dict[str, list[tuple[int, str]]] = {}
+        for ev in evs:
+            if str(ev.get("event", "")).startswith("fault_"):
+                ch = str(ev.get("channel", ""))
+                out.setdefault(ch, []).append((int(ev.get("n", 0)), str(ev["event"])))
+        return out
+
+    orig_faults = fault_decisions(orig_events)
+    rep_faults = fault_decisions(sys_ctx.log.events)
+    all_channels = sorted(set(orig_faults) | set(rep_faults))
+    if all_channels:
+        print("\nFault Decision Consistency:")
+        for ch in all_channels:
+            s1 = orig_faults.get(ch, [])
+            s2 = rep_faults.get(ch, [])
+            k = min(len(s1), len(s2))
+            identical = s1[:k] == s2[:k]
+            print(f"  Channel {ch:<20}: first K={k} decisions identical={identical}")
+
     print(
-        "Note: Fault decisions are reproduced identically; real-time asyncio scheduling "
+        "\nNote: Fault decisions are reproduced identically; real-time asyncio scheduling "
         "interleavings may exhibit minor sub-millisecond variations."
     )
     return 0

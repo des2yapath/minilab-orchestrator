@@ -12,11 +12,13 @@ from typing import Any
 from minilab.devices.base import Device
 from minilab.errors import DeviceError
 
+AMBIENT: float = 25.0
+
 
 class Heater(Device):
     """Simulates a heated reaction block with active thermal dynamics."""
 
-    AMBIENT: float = 25.0
+    AMBIENT: float = AMBIENT
     fail_code: str = "SENSOR_FAULT"
     instant_actions: frozenset[str] = Device.instant_actions | frozenset({"get_temp"})
 

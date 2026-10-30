@@ -57,6 +57,12 @@ class DeviceClient:
         """Start the background incoming message reader loop."""
         self._reader = asyncio.create_task(self._reader_loop(), name=f"client:{self.name}")
 
+        def _on_done(t: asyncio.Task[None]) -> None:
+            if not t.cancelled() and t.exception() is not None:
+                self.log.emit("system", "task_crashed", task=t.get_name(), error=str(t.exception()))
+
+        self._reader.add_done_callback(_on_done)
+
     async def close(self) -> None:
         """Cancel and await the reader loop."""
         if self._reader:
@@ -74,10 +80,7 @@ class DeviceClient:
             p = self._pending.get(msg.msg_id)
             if p is None:
                 self.log.emit(
-                    f"client:{self.name}",
-                    "orphan_response",
-                    msg_id=msg.msg_id,
-                    type=msg.type,
+                    f"client:{self.name}", "orphan_response", msg_id=msg.msg_id, type=msg.type
                 )
                 self.metrics.incr("orphan_responses")
                 continue
@@ -88,10 +91,7 @@ class DeviceClient:
                     p.t_ack = now
                     p.ack_fut.set_result(None)
                     self.log.emit(
-                        f"client:{self.name}",
-                        "ack_recv",
-                        msg_id=msg.msg_id,
-                        rtt=round(now - p.t_first_send, 6),
+                        f"client:{self.name}", "ack_recv", msg_id=msg.msg_id, rtt=round(now - p.t_first_send, 6)
                     )
             elif msg.type in ("done", "error"):
                 if not p.ack_fut.done():
@@ -102,27 +102,16 @@ class DeviceClient:
                     p.done_fut.set_result(msg)
                     if msg.type == "done":
                         self.log.emit(
-                            f"client:{self.name}",
-                            "done_recv",
-                            msg_id=msg.msg_id,
-                            total=round(now - p.t_first_send, 6),
+                            f"client:{self.name}", "done_recv", msg_id=msg.msg_id, total=round(now - p.t_first_send, 6)
                         )
                     else:
                         self.log.emit(
-                            f"client:{self.name}",
-                            "error_recv",
-                            msg_id=msg.msg_id,
-                            error=msg.error,
+                            f"client:{self.name}", "error_recv", msg_id=msg.msg_id, error=msg.error
                         )
 
     async def _send(self, msg: Message, kind: str) -> None:
         self.log.emit(
-            f"client:{self.name}",
-            "cmd_sent",
-            msg_id=msg.msg_id,
-            action=msg.action,
-            attempt=msg.attempt,
-            kind=kind,
+            f"client:{self.name}", "cmd_sent", msg_id=msg.msg_id, action=msg.action, attempt=msg.attempt, kind=kind
         )
         await self.ep.send(msg)
 
