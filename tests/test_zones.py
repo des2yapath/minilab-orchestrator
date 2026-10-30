@@ -71,3 +71,4 @@ def test_find_deadlock_detects_cycle() -> None:
     cycle = zm.find_deadlock()
     assert cycle is not None
     assert set(cycle) == {"task1", "task2"}
+

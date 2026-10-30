@@ -205,3 +205,4 @@ class Device:
         """Inject configured synthetic failure."""
         if self.always_fail or (self.error_prob > 0.0 and self._rng.random() < self.error_prob):
             raise DeviceError(self.fail_code)
+

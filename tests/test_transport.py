@@ -157,3 +157,4 @@ async def test_corrupt_is_caught_by_endpoint() -> None:
     assert len(errs) == 1
 
     await link.close()
+

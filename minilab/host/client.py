@@ -271,3 +271,4 @@ class DeviceClient:
             return False
         finally:
             self._pending.pop(msg_id, None)
+

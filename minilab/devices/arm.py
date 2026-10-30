@@ -56,3 +56,4 @@ class Arm(Device):
     def snapshot(self) -> dict[str, Any]:
         """Return current arm position and status."""
         return {"x": self.x, "y": self.y, "stopped": self.stopped}
+

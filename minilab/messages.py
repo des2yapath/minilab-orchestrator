@@ -103,3 +103,4 @@ def decode(raw: str) -> Message:
         return Message(**data)
     except Exception as e:
         raise FrameError(f"Failed to instantiate Message: {e}") from e
+

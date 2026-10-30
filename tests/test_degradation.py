@@ -63,3 +63,4 @@ async def test_reset_brings_device_back() -> None:
         # Now calls should succeed
         res = await sys.orchestrator.call("pump1", "ping")
         assert res.output == {"pong": True}
+

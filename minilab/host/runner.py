@@ -167,3 +167,4 @@ class WorkflowRunner:
             if res.finished_at is None and res.started_at is not None:
                 res.finished_at = time.perf_counter() - t0
             events[step.id].set()
+

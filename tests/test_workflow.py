@@ -123,3 +123,4 @@ async def test_device_error_fails_step() -> None:
         assert res.status == "DEGRADED"
         assert res.steps["bad_dispense"].status == StepStatus.FAILED
         assert "OUT_OF_RANGE" in res.steps["bad_dispense"].error
+

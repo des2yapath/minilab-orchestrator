@@ -128,3 +128,4 @@ class Workflow:
             raise WorkflowValidationError(
                 f"Dependency cycle detected in workflow involving steps: {cycle_nodes}"
             )
+

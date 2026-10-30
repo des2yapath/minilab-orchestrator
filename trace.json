@@ -1,0 +1,76 @@
+{
+  "traceEvents": [
+    {
+      "ph": "M",
+      "name": "thread_name",
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "name": "arm1"
+      }
+    },
+    {
+      "ph": "M",
+      "name": "thread_name",
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "name": "heater1"
+      }
+    },
+    {
+      "ph": "M",
+      "name": "thread_name",
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "name": "pump1"
+      }
+    },
+    {
+      "name": "prime",
+      "cat": "pump1",
+      "ph": "X",
+      "ts": 3164,
+      "dur": 16599,
+      "pid": 1,
+      "tid": 3
+    },
+    {
+      "name": "heat",
+      "cat": "heater1",
+      "ph": "X",
+      "ts": 3016,
+      "dur": 509627,
+      "pid": 1,
+      "tid": 2
+    },
+    {
+      "name": "move_a",
+      "cat": "arm1",
+      "ph": "X",
+      "ts": 512791,
+      "dur": 30714,
+      "pid": 1,
+      "tid": 1
+    },
+    {
+      "name": "dispense",
+      "cat": "pump1",
+      "ph": "X",
+      "ts": 543716,
+      "dur": 30698,
+      "pid": 1,
+      "tid": 3
+    },
+    {
+      "name": "home",
+      "cat": "arm1",
+      "ph": "X",
+      "ts": 574477,
+      "dur": 30391,
+      "pid": 1,
+      "tid": 1
+    }
+  ]
+}

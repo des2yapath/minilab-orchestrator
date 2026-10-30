@@ -67,3 +67,4 @@ class Pump(Device):
             "dispensed_total": round(self.dispensed_total, 4),
             "stopped": self.stopped,
         }
+

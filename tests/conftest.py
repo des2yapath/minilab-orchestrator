@@ -26,3 +26,4 @@ def assert_no_leaked_tasks() -> None:
 def fast_params() -> dict[str, Any]:
     """Fixture providing fast timing configuration for testing."""
     return dict(FAST)
+

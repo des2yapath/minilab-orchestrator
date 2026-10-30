@@ -40,3 +40,4 @@ class ZoneTimeout(MiniLabError):
 
 class WorkflowValidationError(MiniLabError):
     """Raised when a workflow DAG is invalid (cycles, missing dependencies, bad zones)."""
+

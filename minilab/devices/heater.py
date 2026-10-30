@@ -86,3 +86,4 @@ class Heater(Device):
             "target": round(self.target, 2),
             "stopped": self.stopped,
         }
+

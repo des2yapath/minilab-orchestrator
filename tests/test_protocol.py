@@ -60,3 +60,4 @@ def test_decode_rejects_garbage() -> None:
     crc = f"{zlib.crc32(bad_type_body.encode('utf-8')) & 0xFFFFFFFF:08x}"
     with pytest.raises(FrameError, match="Unknown message type"):
         decode(f"{crc}|{bad_type_body}")
+
