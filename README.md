@@ -1,6 +1,6 @@
 # Mini Lab Controller (`minilab`)
 
-[![ci](https://github.com/des2yapath/minilab-controller/actions/workflows/ci.yml/badge.svg)](https://github.com/des2yapath/minilab-controller/actions/workflows/ci.yml)
+[![ci](https://github.com/des2yapath/minilab-orchestrator/actions/workflows/ci.yml/badge.svg)](https://github.com/des2yapath/minilab-orchestrator/actions/workflows/ci.yml)
 
 **`minilab`** is an asynchronous Python controller that orchestrates a **simulated hardware** robotic laboratory workcell comprising two multi-axis positioning arms, a fluidic dispensing pump, and an active reaction heater. Built using Python's `asyncio` event loop, `minilab` implements a CRC32-framed wire protocol featuring acknowledgements (ACK), timeouts, retries, idempotent reply caching, spatial zone mutual exclusion, and concurrent emergency stop (e-stop) propagation under synthetic transport fault injection.
 
@@ -38,8 +38,8 @@ home       arm1       |                                          █████
 
 ### Installation
 ```bash
-git clone https://github.com/des2yapath/minilab-controller.git
-cd minilab-controller
+git clone https://github.com/des2yapath/minilab-orchestrator.git
+cd minilab-orchestrator
 python -m venv .venv
 # On Linux/macOS:
 source .venv/bin/activate
@@ -161,7 +161,7 @@ See [`docs/BUGS_FOUND.md`](docs/BUGS_FOUND.md) for full reproduction traces, roo
 ## Project Structure & Extending Devices
 
 ```text
-minilab-controller/
+minilab-orchestrator/
 ├── minilab/
 │   ├── errors.py              # Custom exception hierarchy
 │   ├── messages.py            # Message dataclass and CRC32 wire framing

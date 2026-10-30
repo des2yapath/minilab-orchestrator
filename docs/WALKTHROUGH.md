@@ -6,14 +6,14 @@ This guide is designed for the human owner to thoroughly understand the architec
 
 ## 1. Suggested Reading Order
 
-1. [`minilab/messages.py`](file:///C:/Users/divya/OneDrive/Desktop/Codebase/minilab-controller/minilab/messages.py): CRC32-framed message schema and serialization.
-2. [`minilab/transport.py`](file:///C:/Users/divya/OneDrive/Desktop/Codebase/minilab-controller/minilab/transport.py): In-memory channels with deterministic, seeded fault injection.
-3. [`minilab/devices/base.py`](file:///C:/Users/divya/OneDrive/Desktop/Codebase/minilab-controller/minilab/devices/base.py): Device simulator base class with deduplication and e-stop handling.
-4. [`minilab/host/client.py`](file:///C:/Users/divya/OneDrive/Desktop/Codebase/minilab-controller/minilab/host/client.py): Reliable host client with ACK wait, retries, and nudge mechanisms.
-5. [`minilab/host/zones.py`](file:///C:/Users/divya/OneDrive/Desktop/Codebase/minilab-controller/minilab/host/zones.py): Spatial zone manager with canonical ordering and cycle detection.
-6. [`minilab/host/runner.py`](file:///C:/Users/divya/OneDrive/Desktop/Codebase/minilab-controller/minilab/host/runner.py): Concurrent DAG workflow execution engine using asyncio tasks and events.
-7. [`minilab/host/orchestrator.py`](file:///C:/Users/divya/OneDrive/Desktop/Codebase/minilab-controller/minilab/host/orchestrator.py): High-level lifecycle coordinator, emergency stop, and reset.
-8. [`tests/test_bugs.py`](file:///C:/Users/divya/OneDrive/Desktop/Codebase/minilab-controller/tests/test_bugs.py): Planted concurrency bug reproductions and regression test suite.
+1. [`minilab/messages.py`](../minilab/messages.py): CRC32-framed message schema and serialization.
+2. [`minilab/transport.py`](../minilab/transport.py): In-memory channels with deterministic, seeded fault injection.
+3. [`minilab/devices/base.py`](../minilab/devices/base.py): Device simulator base class with deduplication and e-stop handling.
+4. [`minilab/host/client.py`](../minilab/host/client.py): Reliable host client with ACK wait, retries, and nudge mechanisms.
+5. [`minilab/host/zones.py`](../minilab/host/zones.py): Spatial zone manager with canonical ordering and cycle detection.
+6. [`minilab/host/runner.py`](../minilab/host/runner.py): Concurrent DAG workflow execution engine using asyncio tasks and events.
+7. [`minilab/host/orchestrator.py`](../minilab/host/orchestrator.py): High-level lifecycle coordinator, emergency stop, and reset.
+8. [`tests/test_bugs.py`](../tests/test_bugs.py): Planted concurrency bug reproductions and regression test suite.
 
 ---
 
