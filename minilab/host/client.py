@@ -9,42 +9,16 @@ from __future__ import annotations
 import asyncio
 import time
 from collections.abc import Iterator
-from dataclasses import dataclass
 from typing import Any
 
 from minilab.errors import CommandTimeout, DeviceError, DeviceOffline, EStopped
+from minilab.host.client_types import CallResult, EStopState, Pending
 from minilab.logs import EventLog
 from minilab.messages import Message
 from minilab.metrics import Metrics
 from minilab.transport import Endpoint
 
-
-@dataclass
-class EStopState:
-    """Shared state container holding emergency stop latch status."""
-
-    active: bool = False
-
-
-@dataclass
-class CallResult:
-    """Result data from a successful device command execution."""
-
-    output: dict[str, Any]
-    attempts: int
-    ack_rtt: float
-    total: float
-
-
-@dataclass
-class Pending:
-    """Tracks in-flight command futures and timing milestones."""
-
-    ack_fut: asyncio.Future[None]
-    done_fut: asyncio.Future[Message]
-    t_first_send: float = 0.0
-    t_ack: float = 0.0
-    t_done: float = 0.0
+__all__ = ["CallResult", "DeviceClient", "EStopState", "Pending"]
 
 
 class DeviceClient:
@@ -192,7 +166,6 @@ class DeviceClient:
                 if attempt > 0:
                     self.metrics.incr("retries")
 
-                # Use asyncio.wait to preserve shared future
                 await asyncio.wait({p.ack_fut}, timeout=eff_ack_timeout)
                 if p.ack_fut.done():
                     break
@@ -271,4 +244,3 @@ class DeviceClient:
             return False
         finally:
             self._pending.pop(msg_id, None)
-
